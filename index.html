@@ -1,226 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MARKA Super App V2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MARKA | Premium Super App</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --bg: #05070A;
+            --card: rgba(255, 255, 255, 0.05);
+            --glass: rgba(18, 24, 43, 0.8);
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); color: white; overflow-x: hidden;
+            background: radial-gradient(circle at top right, #1a1f35, #05070a);
+            min-height: 100vh;
+        }
 
-<style>
-:root {
-    --bg:#0b0f1a;
-    --card:#12182b;
-    --gold:#d4af37;
-    --text:#fff;
-}
+        /* PREMIUM HEADER */
+        header {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px);
+        }
+        .logo { font-weight: 800; letter-spacing: -1px; font-size: 1.5rem; color: var(--gold); }
+        .lang-pill {
+            background: var(--card); border: 1px solid var(--gold); color: var(--gold);
+            padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+        }
 
-body {
-    margin:0;
-    font-family:Inter;
-    background:var(--bg);
-    color:white;
-}
+        /* MODULAR VIEWS */
+        .module { display: none; padding: 20px 20px 100px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .module.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-nav {
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    background:#00000088;
-    backdrop-filter:blur(10px);
-    position:fixed;
-    width:100%;
-}
+        /* CARDS & UI */
+        .card { 
+            background: var(--card); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 20px; margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .balance-card {
+            background: linear-gradient(135deg, var(--gold), #8A6D3B);
+            color: black; border: none; box-shadow: 0 10px 30px var(--gold-glow);
+        }
 
-button {
-    background:none;
-    border:none;
-    color:white;
-    margin:5px;
-}
+        /* GRID FOR MARKET */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .product { background: var(--card); border-radius: 20px; padding: 15px; text-align: center; }
 
-.page {display:none; padding:80px 20px;}
-.active {display:block;}
+        /* BUTTONS */
+        .btn-gold {
+            background: var(--gold); color: black; border: none; padding: 14px;
+            border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer;
+            box-shadow: 0 4px 15px var(--gold-glow);
+        }
 
-.card {
-    background:var(--card);
-    padding:15px;
-    border-radius:15px;
-    margin:10px 0;
-}
-
-.btn {
-    background:gold;
-    color:black;
-    padding:8px;
-    border-radius:10px;
-}
-
-.video {
-    height:300px;
-    background:black;
-    border-radius:15px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-</style>
+        /* BOTTOM NAV BAR */
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            height: 70px; border-radius: 35px; display: flex; 
+            justify-content: space-around; align-items: center; z-index: 1000;
+        }
+        .nav-btn { background: none; border: none; color: #666; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { color: var(--gold); transform: translateY(-5px); }
+        .nav-btn span { display: block; font-size: 10px; font-weight: 500; margin-top: 4px; }
+    </style>
 </head>
-
 <body>
 
-<nav>
-<div>MARKA</div>
-<div>
-<button onclick="setLang('en')">EN</button>
-<button onclick="setLang('pt')">PT</button>
-<button onclick="setLang('osh')">OSH</button>
-</div>
+<header>
+    <div class="logo">MARKA.</div>
+    <select class="lang-pill" onchange="Module.setLang(this.value)" id="langSelect">
+        <option value="en">English</option>
+        <option value="pt">Português</option>
+        <option value="osh">Oshiwambo</option>
+    </select>
+</header>
+
+<main id="main-content">
+    <!-- Home Module -->
+    <section id="home" class="module">
+        <div class="card balance-card">
+            <small id="t-bal-label"></small>
+            <h1 id="wallet-val" style="margin:0; font-size:2.5rem;"></h1>
+        </div>
+        <h3 id="t-services"></h3>
+        <div class="grid">
+            <div class="product" onclick="Module.navigate('market')">🛒 <p id="t-nav-market"></p></div>
+            <div class="product" onclick="Module.navigate('chat')">💬 <p id="t-nav-chat"></p></div>
+        </div>
+    </section>
+
+    <!-- Market Module -->
+    <section id="market" class="module">
+        <h2 id="t-market-head"></h2>
+        <div class="grid" id="market-list"></div>
+    </section>
+
+    <!-- Chat Module -->
+    <section id="chat" class="module">
+        <h2 id="t-chat-head"></h2>
+        <div id="messages" style="height: 300px; overflow-y: auto; margin-bottom: 20px;"></div>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="chat-input" placeholder="..." style="flex:1; background:var(--card); border:1px solid #333; color:white; border-radius:15px; padding:10px;">
+            <button class="btn-gold" style="width:auto;" onclick="Module.sendMsg()">Send</button>
+        </div>
+    </section>
+
+    <!-- Wallet Module -->
+    <section id="wallet" class="module">
+        <h2 id="t-wallet-head"></h2>
+        <div class="card">
+            <p id="t-withdraw-info"></p>
+            <button class="btn-gold" onclick="Module.withdraw()">Withdraw $50</button>
+        </div>
+    </section>
+</main>
+
+<nav class="nav-bar">
+    <button class="nav-btn" onclick="Module.navigate('home', this)">🏠<span id="t-nav-home"></span></button>
+    <button class="nav-btn" onclick="Module.navigate('market', this)">🛒<span id="t-nav-market2"></span></button>
+    <button class="nav-btn" onclick="Module.navigate('chat', this)">💬<span id="t-nav-chat2"></span></button>
+    <button class="nav-btn" onclick="Module.navigate('wallet', this)">💳<span id="t-nav-wallet"></span></button>
 </nav>
 
-<div id="home" class="page active"></div>
-<div id="market" class="page"></div>
-<div id="video" class="page"></div>
-<div id="chat" class="page"></div>
-<div id="wallet" class="page"></div>
-
 <script>
+/* --- MODULAR CORE ENGINE --- */
+const Module = {
+    state: {
+        lang: localStorage.getItem('lang') || 'en',
+        wallet: parseFloat(localStorage.getItem('wallet')) || 2500.00,
+        messages: JSON.parse(localStorage.getItem('msg')) || [],
+        products: [
+            { name: "Executive Suite", price: 450, icon: "🏨" },
+            { name: "Private Jet", price: 1200, icon: "🛩️" },
+            { name: "Elite Concierge", price: 150, icon: "🤵" }
+        ]
+    },
 
-/* LANGUAGE SYSTEM */
-let lang = localStorage.getItem("lang") || "en";
+    dict: {
+        en: { home: "Home", market: "Market", chat: "Chat", wallet: "Wallet", bal: "Available Balance", services: "Services", buy: "Acquire", msg: "Community", with: "Request Withdrawal" },
+        pt: { home: "Início", market: "Mercado", chat: "Chat", wallet: "Carteira", bal: "Saldo Disponível", services: "Serviços", buy: "Adquirir", msg: "Comunidade", with: "Solicitar Saque" },
+        osh: { home: "Oumbo", market: "Omarket", chat: "Chat", wallet: "Wallet", bal: "Oimaliwa yoye", services: "Omayakulo", buy: "Landula", msg: "Eenghundana", with: "Kufa mo Oimaliwa" }
+    },
 
-const t = {
-    en:{home:"Home",market:"Market",chat:"Chat",wallet:"Wallet",buy:"Buy",request:"Request"},
-    pt:{home:"Início",market:"Mercado",chat:"Chat",wallet:"Carteira",buy:"Comprar",request:"Pedir"},
-    osh:{home:"Oumbo",market:"Omarket",chat:"Chat",wallet:"Wallet",buy:"Landula",request:"Indila"}
+    init() {
+        document.getElementById('langSelect').value = this.state.lang;
+        this.navigate('home');
+        this.registerSW();
+    },
+
+    navigate(id, btn) {
+        document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(btn) btn.classList.add('active');
+        else document.querySelector('.nav-btn').classList.add('active');
+        this.render();
+    },
+
+    setLang(l) {
+        this.state.lang = l;
+        localStorage.setItem('lang', l);
+        this.render();
+    },
+
+    withdraw() {
+        this.state.wallet -= 50;
+        this.save();
+    },
+
+    sendMsg() {
+        const input = document.getElementById('chat-input');
+        if(!input.value) return;
+        this.state.messages.push(input.value);
+        input.value = "";
+        this.save();
+    },
+
+    save() {
+        localStorage.setItem('wallet', this.state.wallet);
+        localStorage.setItem('msg', JSON.stringify(this.state.messages));
+        this.render();
+    },
+
+    render() {
+        const t = this.dict[this.state.lang];
+        
+        // Update Labels
+        document.getElementById('t-bal-label').innerText = t.bal;
+        document.getElementById('t-services').innerText = t.services;
+        document.getElementById('t-nav-home').innerText = t.home;
+        document.getElementById('t-nav-market').innerText = t.market;
+        document.getElementById('t-nav-market2').innerText = t.market;
+        document.getElementById('t-nav-chat').innerText = t.chat;
+        document.getElementById('t-nav-chat2').innerText = t.chat;
+        document.getElementById('t-nav-wallet').innerText = t.wallet;
+        document.getElementById('t-market-head').innerText = t.market;
+        document.getElementById('t-chat-head').innerText = t.msg;
+        document.getElementById('t-wallet-head').innerText = t.wallet;
+        document.getElementById('t-withdraw-info').innerText = t.with;
+
+        // Update Dynamic Data
+        document.getElementById('wallet-val').innerText = `$${this.state.wallet.toLocaleString()}`;
+        
+        const mList = document.getElementById('market-list');
+        mList.innerHTML = this.state.products.map(p => `
+            <div class="product">
+                <div style="font-size:30px">${p.icon}</div>
+                <div style="font-weight:800; margin:10px 0;">${p.name}</div>
+                <div style="color:var(--gold); margin-bottom:10px;">$${p.price}</div>
+                <button class="btn-gold" style="padding:8px; font-size:12px;" onclick="Module.buy(${p.price})">${t.buy}</button>
+            </div>
+        `).join('');
+
+        const cBox = document.getElementById('messages');
+        cBox.innerHTML = this.state.messages.map(m => `<div class="card" style="padding:10px; margin-bottom:10px;">${m}</div>`).join('');
+        cBox.scrollTop = cBox.scrollHeight;
+    },
+
+    buy(price) {
+        if(this.state.wallet >= price) {
+            this.state.wallet -= price;
+            this.save();
+        } else { alert("Limit Exceeded"); }
+    },
+
+    registerSW() {
+        if ('serviceWorker' in navigator) {
+            const sw = `
+                const cacheName = 'marka-v2';
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('fetch', e => {
+                    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+                });
+            `;
+            const blob = new Blob([sw], { type: 'text/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+    }
 };
 
-function setLang(l){
-    lang=l;
-    localStorage.setItem("lang",l);
-    render();
-}
-
-/* ROUTER */
-let current="home";
-
-function navigate(p){
-    current=p;
-    render();
-}
-
-/* DATA */
-let wallet = parseFloat(localStorage.getItem("wallet")||1000);
-let messages = JSON.parse(localStorage.getItem("msg")||"[]");
-
-const products=[
-    {name:"Phone",price:500},
-    {name:"Taxi",price:10},
-    {name:"Hotel",price:200}
-];
-
-/* RENDER */
-function render(){
-
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-document.getElementById(current).classList.add("active");
-
-/* HOME */
-document.getElementById("home").innerHTML=`
-<h2>${t[lang].home}</h2>
-<div class="card">Balance: $${wallet}</div>
-<button onclick="navigate('market')">${t[lang].market}</button>
-<button onclick="navigate('video')">Video</button>
-<button onclick="navigate('chat')">${t[lang].chat}</button>
-<button onclick="navigate('wallet')">${t[lang].wallet}</button>
-`;
-
-/* MARKET */
-document.getElementById("market").innerHTML=`
-<h2>${t[lang].market}</h2>
-${products.map(p=>`
-<div class="card">
-${p.name} - $${p.price}
-<br>
-<button class="btn" onclick="buy(${p.price})">${t[lang].buy}</button>
-<button class="btn" onclick="request('${p.name}')">${t[lang].request}</button>
-</div>
-`).join("")}
-<button onclick="navigate('home')">Back</button>
-`;
-
-/* VIDEO */
-document.getElementById("video").innerHTML=`
-<h2>Live Feed</h2>
-<div class="video">🎥 Video Feed</div>
-<button onclick="navigate('home')">Back</button>
-`;
-
-/* CHAT */
-document.getElementById("chat").innerHTML=`
-<h2>${t[lang].chat}</h2>
-<div class="card">${messages.map(m=>`<div>${m}</div>`).join("")}</div>
-<input id="msg">
-<button onclick="sendMsg()">Send</button>
-<button onclick="navigate('home')">Back</button>
-`;
-
-/* WALLET */
-document.getElementById("wallet").innerHTML=`
-<h2>${t[lang].wallet}</h2>
-<div class="card">$${wallet}</div>
-<button onclick="withdraw()">Withdraw</button>
-<button onclick="navigate('home')">Back</button>
-`;
-
-}
-
-/* ACTIONS */
-function buy(price){
-    wallet-=price;
-    save();
-    render();
-}
-
-function request(name){
-    alert("Request sent: "+name);
-}
-
-function withdraw(){
-    wallet-=50;
-    save();
-    render();
-}
-
-function sendMsg(){
-    let val=document.getElementById("msg").value;
-    if(!val) return;
-    messages.push(val);
-    save();
-    render();
-}
-
-function save(){
-    localStorage.setItem("wallet",wallet);
-    localStorage.setItem("msg",JSON.stringify(messages));
-}
-
-/* OFFLINE READY (BASIC) */
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register(URL.createObjectURL(new Blob([`
-self.addEventListener('install',e=>{
-self.skipWaiting();
-});
-self.addEventListener('fetch',e=>{
-e.respondWith(fetch(e.request).catch(()=>new Response("Offline")));
-});
-`],{type:'text/javascript'})));
-}
-
-/* INIT */
-render();
-
+// Launch App
+Module.init();
 </script>
 
 </body>
-</html>
+            </html>
+    
