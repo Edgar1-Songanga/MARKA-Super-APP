@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARKA Super App V2</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg:#0b0f1a;
+    --card:#12182b;
+    --gold:#d4af37;
+    --text:#fff;
+}
+
+body {
+    margin:0;
+    font-family:Inter;
+    background:var(--bg);
+    color:white;
+}
+
+nav {
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:#00000088;
+    backdrop-filter:blur(10px);
+    position:fixed;
+    width:100%;
+}
+
+button {
+    background:none;
+    border:none;
+    color:white;
+    margin:5px;
+}
+
+.page {display:none; padding:80px 20px;}
+.active {display:block;}
+
+.card {
+    background:var(--card);
+    padding:15px;
+    border-radius:15px;
+    margin:10px 0;
+}
+
+.btn {
+    background:gold;
+    color:black;
+    padding:8px;
+    border-radius:10px;
+}
+
+.video {
+    height:300px;
+    background:black;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<div>MARKA</div>
+<div>
+<button onclick="setLang('en')">EN</button>
+<button onclick="setLang('pt')">PT</button>
+<button onclick="setLang('osh')">OSH</button>
+</div>
+</nav>
+
+<div id="home" class="page active"></div>
+<div id="market" class="page"></div>
+<div id="video" class="page"></div>
+<div id="chat" class="page"></div>
+<div id="wallet" class="page"></div>
+
+<script>
+
+/* LANGUAGE SYSTEM */
+let lang = localStorage.getItem("lang") || "en";
+
+const t = {
+    en:{home:"Home",market:"Market",chat:"Chat",wallet:"Wallet",buy:"Buy",request:"Request"},
+    pt:{home:"Início",market:"Mercado",chat:"Chat",wallet:"Carteira",buy:"Comprar",request:"Pedir"},
+    osh:{home:"Oumbo",market:"Omarket",chat:"Chat",wallet:"Wallet",buy:"Landula",request:"Indila"}
+};
+
+function setLang(l){
+    lang=l;
+    localStorage.setItem("lang",l);
+    render();
+}
+
+/* ROUTER */
+let current="home";
+
+function navigate(p){
+    current=p;
+    render();
+}
+
+/* DATA */
+let wallet = parseFloat(localStorage.getItem("wallet")||1000);
+let messages = JSON.parse(localStorage.getItem("msg")||"[]");
+
+const products=[
+    {name:"Phone",price:500},
+    {name:"Taxi",price:10},
+    {name:"Hotel",price:200}
+];
+
+/* RENDER */
+function render(){
+
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(current).classList.add("active");
+
+/* HOME */
+document.getElementById("home").innerHTML=`
+<h2>${t[lang].home}</h2>
+<div class="card">Balance: $${wallet}</div>
+<button onclick="navigate('market')">${t[lang].market}</button>
+<button onclick="navigate('video')">Video</button>
+<button onclick="navigate('chat')">${t[lang].chat}</button>
+<button onclick="navigate('wallet')">${t[lang].wallet}</button>
+`;
+
+/* MARKET */
+document.getElementById("market").innerHTML=`
+<h2>${t[lang].market}</h2>
+${products.map(p=>`
+<div class="card">
+${p.name} - $${p.price}
+<br>
+<button class="btn" onclick="buy(${p.price})">${t[lang].buy}</button>
+<button class="btn" onclick="request('${p.name}')">${t[lang].request}</button>
+</div>
+`).join("")}
+<button onclick="navigate('home')">Back</button>
+`;
+
+/* VIDEO */
+document.getElementById("video").innerHTML=`
+<h2>Live Feed</h2>
+<div class="video">🎥 Video Feed</div>
+<button onclick="navigate('home')">Back</button>
+`;
+
+/* CHAT */
+document.getElementById("chat").innerHTML=`
+<h2>${t[lang].chat}</h2>
+<div class="card">${messages.map(m=>`<div>${m}</div>`).join("")}</div>
+<input id="msg">
+<button onclick="sendMsg()">Send</button>
+<button onclick="navigate('home')">Back</button>
+`;
+
+/* WALLET */
+document.getElementById("wallet").innerHTML=`
+<h2>${t[lang].wallet}</h2>
+<div class="card">$${wallet}</div>
+<button onclick="withdraw()">Withdraw</button>
+<button onclick="navigate('home')">Back</button>
+`;
+
+}
+
+/* ACTIONS */
+function buy(price){
+    wallet-=price;
+    save();
+    render();
+}
+
+function request(name){
+    alert("Request sent: "+name);
+}
+
+function withdraw(){
+    wallet-=50;
+    save();
+    render();
+}
+
+function sendMsg(){
+    let val=document.getElementById("msg").value;
+    if(!val) return;
+    messages.push(val);
+    save();
+    render();
+}
+
+function save(){
+    localStorage.setItem("wallet",wallet);
+    localStorage.setItem("msg",JSON.stringify(messages));
+}
+
+/* OFFLINE READY (BASIC) */
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register(URL.createObjectURL(new Blob([`
+self.addEventListener('install',e=>{
+self.skipWaiting();
+});
+self.addEventListener('fetch',e=>{
+e.respondWith(fetch(e.request).catch(()=>new Response("Offline")));
+});
+`],{type:'text/javascript'})));
+}
+
+/* INIT */
+render();
+
+</script>
+
+</body>
+</html>
